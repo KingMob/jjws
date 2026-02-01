@@ -1,6 +1,6 @@
 ---
 id: jjs-5r8s
-status: open
+status: closed
 deps: [jjs-7gp8]
 links: []
 created: 2026-02-01T11:39:36Z

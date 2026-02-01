@@ -68,6 +68,7 @@ require_directory() {
     fi
 }
 
+
 # Function to display usage information
 usage() {
     SCRIPT_BASENAME=$(basename "$0")
@@ -79,7 +80,7 @@ Usage: jjsib <mode> [workspace-name] [parent-revset]
 Manages sibling Jujutsu (jj) workspaces at the same directory level as the current repository.
 
 Modes:
-  init        Rename current workspace to match base directory name
+  init        Rename current workspace to match base directory name (usually not needed)
   add|create  Create a new sibling workspace
   remove|rm   Remove an existing sibling workspace
   switch|sw   Switch to an existing sibling workspace
@@ -95,7 +96,8 @@ Arguments:
                     Not required for 'init', 'list', or for 'remove'/'switch' in interactive mode
   parent-revset     Parent revision (or revset) for new workspace (add mode only, default: @)
 
-Note: Sibling directories use the workspace name as the directory name
+Note: Sibling directories use the workspace name as the directory name.
+      Workspace names are auto-synced to match directory names on each invocation.
 
 Initialization Script:
   If a file named '.workspace-init.sh' exists in the newly created workspace directory,
@@ -423,6 +425,19 @@ if [ -z "$WS_ROOT" ]; then
 fi
 
 PARENT_DIR=$(dirname "$WS_ROOT")
+
+
+# Auto-sync workspace name with directory name
+# This runs before any mode logic to ensure workspace/directory names match
+BASE_DIR_NAME=$(basename "$WS_ROOT")
+
+# Check if a workspace with the directory name already exists
+if ! jj workspace list --ignore-working-copy 2>/dev/null | grep -q "^${BASE_DIR_NAME}:"; then
+    # No workspace matches directory name - rename current workspace
+    if jj workspace rename "$BASE_DIR_NAME" 2>/dev/null; then
+        echo "🔄 Auto-synced workspace name to '$BASE_DIR_NAME'" >&2
+    fi
+fi
 
 
 # Validate mode and arguments using case statement
