@@ -54,8 +54,8 @@ load 'test_helper/common'
     [[ "$output" == *"Too many arguments"* ]]
 }
 
-@test "remove mode rejects too many arguments" {
-    run_jjsib remove workspace1 workspace2
+@test "forget mode rejects too many arguments" {
+    run_jjsib forget workspace1 workspace2
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"requires exactly one workspace name"* ]]

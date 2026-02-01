@@ -91,8 +91,8 @@ load 'test_helper/common'
     # Create a file (not directory)
     touch "${TEST_TEMP_DIR}/a-file"
 
-    # Try to remove it (which uses require_directory internally)
-    run_jjsib remove a-file
+    # Try to forget it (which uses require_directory internally)
+    run_jjsib forget a-file
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"is not a directory"* ]] || [[ "$output" == *"does not exist"* ]]
@@ -138,17 +138,17 @@ load 'test_helper/common'
     [[ "$output" == *"ws-beta"* ]]
 }
 
-@test "remove works from different sibling workspace" {
-    run_jjsib add to-be-removed
+@test "forget works from different sibling workspace" {
+    run_jjsib add to-be-forgotten
     run_jjsib add other-sibling
     [ "$status" -eq 0 ]
 
     # Move to other sibling
     cd "${TEST_TEMP_DIR}/other-sibling"
 
-    # Remove from there
-    run_jjsib remove to-be-removed
+    # Forget from there
+    run_jjsib forget to-be-forgotten
 
     [ "$status" -eq 0 ]
-    [ ! -d "${TEST_TEMP_DIR}/to-be-removed" ]
+    [ ! -d "${TEST_TEMP_DIR}/to-be-forgotten" ]
 }

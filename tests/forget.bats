@@ -2,25 +2,35 @@
 
 load 'test_helper/common'
 
-# Tests for remove/rm mode
+# Tests for forget/remove/rm mode
 
-@test "remove deletes sibling workspace" {
+@test "forget deletes sibling workspace" {
     # First add a workspace
-    run_jjsib add to-remove
+    run_jjsib add to-forget
     [ "$status" -eq 0 ]
-    [ -d "${TEST_TEMP_DIR}/to-remove" ]
+    [ -d "${TEST_TEMP_DIR}/to-forget" ]
 
-    # Now remove it
-    run_jjsib remove to-remove
+    # Now forget it
+    run_jjsib forget to-forget
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Successfully deleted"* ]]
 
     # Directory should be gone
+    [ ! -d "${TEST_TEMP_DIR}/to-forget" ]
+}
+
+@test "remove is an alias for forget" {
+    run_jjsib add to-remove
+    [ "$status" -eq 0 ]
+
+    run_jjsib remove to-remove
+
+    [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/to-remove" ]
 }
 
-@test "rm is an alias for remove" {
+@test "rm is an alias for forget" {
     run_jjsib add to-rm
     [ "$status" -eq 0 ]
 
@@ -30,7 +40,7 @@ load 'test_helper/common'
     [ ! -d "${TEST_TEMP_DIR}/to-rm" ]
 }
 
-@test "remove forgets workspace from jj" {
+@test "forget removes workspace from jj" {
     run_jjsib add will-forget
     [ "$status" -eq 0 ]
 
@@ -38,8 +48,8 @@ load 'test_helper/common'
     run jj workspace list --ignore-working-copy
     [[ "$output" == *"will-forget"* ]]
 
-    # Remove it
-    run_jjsib remove will-forget
+    # Forget it
+    run_jjsib forget will-forget
     [ "$status" -eq 0 ]
 
     # Verify workspace is no longer listed
@@ -47,25 +57,25 @@ load 'test_helper/common'
     [[ "$output" != *"will-forget"* ]]
 }
 
-@test "remove cannot remove current workspace" {
-    # Try to remove the current workspace (test-repo)
-    run_jjsib remove test-repo
+@test "forget cannot forget current workspace" {
+    # Try to forget the current workspace (test-repo)
+    run_jjsib forget test-repo
 
     [ "$status" -eq 1 ]
-    [[ "$output" == *"Cannot remove the workspace you are currently in"* ]]
+    [[ "$output" == *"Cannot forget the workspace you are currently in"* ]]
 
     # Directory should still exist
     [ -d "${TEST_REPO_DIR}" ]
 }
 
-@test "remove fails for non-existent workspace" {
-    run_jjsib remove nonexistent-workspace
+@test "forget fails for non-existent workspace" {
+    run_jjsib forget nonexistent-workspace
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"does not exist"* ]]
 }
 
-@test "remove handles workspace with files" {
+@test "forget handles workspace with files" {
     run_jjsib add ws-with-files
     [ "$status" -eq 0 ]
 
@@ -74,28 +84,28 @@ load 'test_helper/common'
     mkdir -p "${TEST_TEMP_DIR}/ws-with-files/subdir"
     echo "nested" > "${TEST_TEMP_DIR}/ws-with-files/subdir/nested.txt"
 
-    # Remove should still work
-    run_jjsib remove ws-with-files
+    # Forget should still work
+    run_jjsib forget ws-with-files
 
     [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/ws-with-files" ]
 }
 
-@test "remove multiple workspaces sequentially" {
+@test "forget multiple workspaces sequentially" {
     run_jjsib add ws-a
     run_jjsib add ws-b
     run_jjsib add ws-c
 
-    # Remove them one by one
-    run_jjsib remove ws-a
+    # Forget them one by one
+    run_jjsib forget ws-a
     [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/ws-a" ]
 
-    run_jjsib remove ws-b
+    run_jjsib forget ws-b
     [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/ws-b" ]
 
-    run_jjsib remove ws-c
+    run_jjsib forget ws-c
     [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/ws-c" ]
 }

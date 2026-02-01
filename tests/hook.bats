@@ -47,9 +47,8 @@ teardown() {
     # Should use complete -F
     [[ "$output" == *"complete -F"* ]]
     # Should reference available modes
-    [[ "$output" == *"init"* ]]
     [[ "$output" == *"add"* ]]
-    [[ "$output" == *"remove"* ]]
+    [[ "$output" == *"forget"* ]]
     [[ "$output" == *"switch"* ]]
 }
 
@@ -72,7 +71,7 @@ teardown() {
     [[ "$output" == *"_describe"* ]]
     # Should have mode descriptions
     [[ "$output" == *"Create a new sibling workspace"* ]]
-    [[ "$output" == *"Remove an existing sibling workspace"* ]]
+    [[ "$output" == *"Forget and delete a sibling workspace"* ]]
 }
 
 @test "hook fish outputs shell function" {

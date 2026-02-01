@@ -80,19 +80,19 @@ Usage: jjsib <mode> [workspace-name] [parent-revset]
 Manages sibling Jujutsu (jj) workspaces at the same directory level as the current repository.
 
 Modes:
-  add|create  Create a new sibling workspace
-  remove|rm   Remove an existing sibling workspace
-  switch|sw   Switch to an existing sibling workspace
-  rename      Rename an existing workspace and its directory
-  list|ls     List all workspaces
-  hook        Output shell function and bash completion script for installation
-  version     Show version information
-  help        Show this help message
+  add|create        Create a new sibling workspace
+  forget|remove|rm  Forget and delete a sibling workspace
+  switch|sw         Switch to an existing sibling workspace
+  rename            Rename an existing workspace and its directory
+  list|ls           List all workspaces
+  hook              Output shell function and bash completion script for installation
+  version           Show version information
+  help              Show this help message
 
 Arguments:
   mode
   workspace-name    Name of the workspace (will be used as the directory name)
-                    Not required for 'list', or for 'remove'/'switch' in interactive mode
+                    Not required for 'list', or for 'forget'/'switch' in interactive mode
   parent-revset     Parent revision (or revset) for new workspace (add mode only, default: @)
 
 Note: Sibling directories use the workspace name as the directory name.
@@ -102,7 +102,7 @@ Initialization Script:
   If a file named '.workspace-init.sh' exists in the newly created workspace directory,
   it will be automatically executed after workspace creation. This allows for
   automatic setup of workspace-specific configurations, dependencies, or other
-  initialization tasks. (Falls back to '.jjsib-add-init.sh' for backwards compatibility.)
+  initialization tasks.
 
   For robustness, init scripts should start with:
     cd "\$(dirname "\$0")" || exit 1
@@ -114,8 +114,8 @@ Examples:
   jjsib add hotfix-123 @
   jjsib add experiment-ui @-
   jjsib list
-  jjsib remove feature-workspace
-  jjsib rm hotfix-123                 # Same as remove
+  jjsib forget feature-workspace
+  jjsib rm hotfix-123                 # Same as forget
   jjsib switch                        # Interactive selection
   jjsib sw feature-workspace          # Non-interactive switch
   jjsib rename old-name new-name      # Rename workspace and directory
@@ -214,8 +214,9 @@ if [[ -n "$ZSH_VERSION" ]]; then
         modes=(
             'add:Create a new sibling workspace'
             'create:Create a new sibling workspace'
-            'remove:Remove an existing sibling workspace'
-            'rm:Remove an existing sibling workspace'
+            'forget:Forget and delete a sibling workspace'
+            'remove:Forget and delete a sibling workspace'
+            'rm:Forget and delete a sibling workspace'
             'switch:Switch to an existing sibling workspace'
             'sw:Switch to an existing sibling workspace'
             'rename:Rename an existing workspace and its directory'
@@ -230,7 +231,7 @@ if [[ -n "$ZSH_VERSION" ]]; then
             _describe 'mode' modes
         elif (( CURRENT == 3 )); then
             case "${words[2]}" in
-                switch|sw|remove|rm|rename)
+                switch|sw|forget|remove|rm|rename)
                     if command -v jj >/dev/null 2>&1 && jj root >/dev/null 2>&1; then
                         workspaces=(${(f)"$(jj workspace list 2>/dev/null | awk -F: '{print $1}' | sort)"})
                         [[ -n "$workspaces" ]] && _describe 'workspace' workspaces
@@ -270,7 +271,7 @@ elif [[ -n "$BASH_VERSION" ]]; then
         prev="${COMP_WORDS[COMP_CWORD-1]}"
 
         # Available modes
-        local modes="add create remove rm switch sw rename list ls hook version help"
+        local modes="add create forget remove rm switch sw rename list ls hook version help"
 
         # If we're completing the first argument (mode)
         if [[ $COMP_CWORD -eq 1 ]]; then
@@ -278,8 +279,8 @@ elif [[ -n "$BASH_VERSION" ]]; then
             return 0
         fi
 
-        # If we're completing the second argument and the first was 'switch', 'remove', or 'rename'
-        if [[ $COMP_CWORD -eq 2 && ("$prev" == "switch" || "$prev" == "sw" || "$prev" == "remove" || "$prev" == "rm" || "$prev" == "rename") ]]; then
+        # If we're completing the second argument and the first was 'switch', 'forget', 'remove', or 'rename'
+        if [[ $COMP_CWORD -eq 2 && ("$prev" == "switch" || "$prev" == "sw" || "$prev" == "forget" || "$prev" == "remove" || "$prev" == "rm" || "$prev" == "rename") ]]; then
             # Get workspace names from jj workspace list
             # Check if we're in a jj repository first
             if command -v jj >/dev/null 2>&1 && jj root >/dev/null 2>&1; then
@@ -368,9 +369,11 @@ complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
     -a "create" -d "Create a new sibling workspace"
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
-    -a "remove" -d "Remove an existing sibling workspace"
+    -a "forget" -d "Forget and delete a sibling workspace"
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
-    -a "rm" -d "Remove an existing sibling workspace"
+    -a "remove" -d "Forget and delete a sibling workspace"
+complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+    -a "rm" -d "Forget and delete a sibling workspace"
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
     -a "switch" -d "Switch to an existing sibling workspace"
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
@@ -388,8 +391,8 @@ complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
     -a "help" -d "Show help message"
 
-# Workspace name completions for switch, remove, rename (second argument)
-complete -c jjsib -f -n "__fish_seen_subcommand_from switch sw remove rm rename; and test (count (commandline -opc)) -eq 2" \
+# Workspace name completions for switch, forget, remove, rename (second argument)
+complete -c jjsib -f -n "__fish_seen_subcommand_from switch sw forget remove rm rename; and test (count (commandline -opc)) -eq 2" \
     -a "(__jjsib_workspaces)" -d "Workspace"
 
 # For rename, complete new workspace name (third argument)
@@ -467,12 +470,12 @@ case "$MODE" in
         SIBLING_DIR_NAME="$WORKSPACE_NAME"
         set_sibling_path
         ;;
-    remove|rm)
+    forget|remove|rm)
         if [ $# -eq 1 ]; then
-            # Remove with no workspace name is allowed (will use interactive selection)
+            # Forget with no workspace name is allowed (will use interactive selection)
             INTERACTIVE=true
         else
-            # For remove mode with explicit workspace, we need at least 2 arguments
+            # For forget mode with explicit workspace, we need at least 2 arguments
             if [ $# -ne 2 ]; then
                 echo "❌ Mode '$MODE' requires exactly one workspace name" >&2
                 usage
@@ -484,7 +487,7 @@ case "$MODE" in
                 usage
                 exit 1
             fi
-            
+
             SIBLING_DIR_NAME="$WORKSPACE_NAME"
             set_sibling_path
         fi
@@ -535,7 +538,7 @@ case "$MODE" in
         NEW_SIBLING_PATH="$PARENT_DIR/$NEW_WORKSPACE_NAME"
         ;;
     *)
-        echo "❌ Mode must be 'add', 'create', 'remove', 'rm', 'switch', 'sw', 'rename', 'list', 'ls', 'hook', 'version', or 'help'" >&2
+        echo "❌ Mode must be 'add', 'create', 'forget', 'remove', 'rm', 'switch', 'sw', 'rename', 'list', 'ls', 'hook', 'version', or 'help'" >&2
         usage
         exit 1
         ;;
@@ -592,31 +595,31 @@ case "$MODE" in
         fi
         ;;
     
-    remove|rm)
+    forget|remove|rm)
         if [ -n "${INTERACTIVE:-}" ]; then
             resolve_workspace_interactive
         fi
 
         require_directory "$SIBLING_PATH" || exit 1
 
-        # Check if trying to remove the current workspace
+        # Check if trying to forget the current workspace
         if [ "$WS_ROOT" = "$SIBLING_PATH" ]; then
-            echo "❌ Cannot remove the workspace you are currently in" >&2
+            echo "❌ Cannot forget the workspace you are currently in" >&2
             exit 1
         fi
 
-        echo "Removing sibling workspace: $WORKSPACE_NAME"
+        echo "Forgetting sibling workspace: $WORKSPACE_NAME"
         echo "  Location: $SIBLING_PATH"
 
         # Forget the workspace in jj
         if jj workspace forget "$WORKSPACE_NAME"; then
             echo "✅ Workspace forgotten from jj"
-            
-            # Remove the sibling directory
+
+            # Delete the sibling directory
             if rm -r "$SIBLING_PATH"; then
                 echo "✅ Successfully deleted: $SIBLING_PATH"
             else
-                echo "❌ Failed to remove directory '$SIBLING_PATH'" >&2
+                echo "❌ Failed to delete directory '$SIBLING_PATH'" >&2
                 exit 1
             fi
         else
