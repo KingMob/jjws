@@ -26,3 +26,9 @@ Create a test suite that exercises jjsib functionality in isolated temporary jj 
 - Script should be runnable via `./test.sh` or similar
 - Exit non-zero on any test failure
 
+## Implementation Tickets
+- jjs-ts1i: Set up mise with bats (chore)
+- jjs-g1cp: Create test helper with jj repo fixture (feature, depends on ts1i)
+- jjs-dlkp: Write auto-sync tests (feature, depends on g1cp)
+- jjs-kug1: Add GitHub Actions CI for tests (chore, depends on dlkp)
+

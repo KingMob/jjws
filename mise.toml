@@ -1,0 +1,10 @@
+[tools]
+bats = "latest"
+
+[tasks.test]
+description = "Run all bats tests"
+run = "bats tests/*.bats"
+
+[tasks."test:file"]
+description = "Run a single test file"
+run = "bats {{arg(name='file')}}"
