@@ -1,6 +1,6 @@
 ---
 id: jjs-4qpo
-status: open
+status: closed
 deps: []
 links: []
 created: 2026-02-01T12:45:46Z
