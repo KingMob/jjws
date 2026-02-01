@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-VERSION="0.2.0"
+VERSION="0.3.0"
 
 # Function to validate workspace name
 validate_workspace_name() {
@@ -80,7 +80,6 @@ Usage: jjsib <mode> [workspace-name] [parent-revset]
 Manages sibling Jujutsu (jj) workspaces at the same directory level as the current repository.
 
 Modes:
-  init        Rename current workspace to match base directory name (usually not needed)
   add|create  Create a new sibling workspace
   remove|rm   Remove an existing sibling workspace
   switch|sw   Switch to an existing sibling workspace
@@ -93,7 +92,7 @@ Modes:
 Arguments:
   mode
   workspace-name    Name of the workspace (will be used as the directory name)
-                    Not required for 'init', 'list', or for 'remove'/'switch' in interactive mode
+                    Not required for 'list', or for 'remove'/'switch' in interactive mode
   parent-revset     Parent revision (or revset) for new workspace (add mode only, default: @)
 
 Note: Sibling directories use the workspace name as the directory name.
@@ -110,12 +109,11 @@ Initialization Script:
   This ensures the script works when run manually from any directory.
 
 Examples:
-  jjsib init
   jjsib add feature-workspace
   jjsib add feature-workspace main
   jjsib add hotfix-123 @
   jjsib add experiment-ui @-
-  jjsib ls
+  jjsib list
   jjsib remove feature-workspace
   jjsib rm hotfix-123                 # Same as remove
   jjsib switch                        # Interactive selection
@@ -201,7 +199,7 @@ jjsib() {
         fi
         return $exit_code
     else
-        # For add, remove, list, init, or any other mode, just call the script directly
+        # For add, remove, list, or any other mode, just call the script directly
         "$script_path" "$@"
         return $?
     fi
@@ -214,7 +212,6 @@ if [[ -n "$ZSH_VERSION" ]]; then
     _jjsib() {
         local -a modes workspaces common_revisions
         modes=(
-            'init:Rename workspace to match directory name'
             'add:Create a new sibling workspace'
             'create:Create a new sibling workspace'
             'remove:Remove an existing sibling workspace'
@@ -273,7 +270,7 @@ elif [[ -n "$BASH_VERSION" ]]; then
         prev="${COMP_WORDS[COMP_CWORD-1]}"
 
         # Available modes
-        local modes="init add create remove rm switch sw rename list ls hook version help"
+        local modes="add create remove rm switch sw rename list ls hook version help"
 
         # If we're completing the first argument (mode)
         if [[ $COMP_CWORD -eq 1 ]]; then
@@ -367,8 +364,6 @@ complete -c jjsib -e
 
 # Mode completions (first argument only)
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
-    -a "init" -d "Rename workspace to match directory name"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
     -a "add" -d "Create a new sibling workspace"
 complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
     -a "create" -d "Create a new sibling workspace"
@@ -442,14 +437,6 @@ fi
 
 # Validate mode and arguments using case statement
 case "$MODE" in
-    init)
-        # Init mode doesn't accept additional arguments
-        if [ $# -gt 1 ]; then
-            echo "❌ 'init' mode doesn't accept additional arguments" >&2
-            usage
-            exit 1
-        fi
-        ;;
     list|ls)
         if [ $# -gt 1 ]; then
             echo "❌ 'list' mode doesn't accept any arguments" >&2
@@ -548,7 +535,7 @@ case "$MODE" in
         NEW_SIBLING_PATH="$PARENT_DIR/$NEW_WORKSPACE_NAME"
         ;;
     *)
-        echo "❌ Mode must be 'init', 'add', 'create', 'remove', 'rm', 'switch', 'sw', 'rename', 'list', 'ls', 'hook', 'version', or 'help'" >&2
+        echo "❌ Mode must be 'add', 'create', 'remove', 'rm', 'switch', 'sw', 'rename', 'list', 'ls', 'hook', 'version', or 'help'" >&2
         usage
         exit 1
         ;;
@@ -559,19 +546,6 @@ esac
 
 # Execute mode-specific logic using case statement
 case "$MODE" in
-    init)
-        # Get the base directory name
-        BASE_DIR_NAME=$(basename "$WS_ROOT")
-                
-        # Rename the workspace to match the base directory name
-        if jj workspace rename "$BASE_DIR_NAME"; then
-            echo "✅ Successfully renamed workspace to '$BASE_DIR_NAME'!"
-        else
-            echo "❌ Failed to rename workspace" >&2
-            exit 1
-        fi
-        ;;
-        
     list|ls)
         jj workspace list
         ;;

@@ -62,9 +62,6 @@ This provides the `jjsib` command with directory switching and shell completions
 ## Quick Start
 
 ```bash
-# Initialize in an existing jj repo (renames workspace to match directory)
-jjsib init
-
 # Create a new sibling workspace
 jjsib add feature-x
 
@@ -82,7 +79,6 @@ jjsib remove feature-x
 
 | Command | Description |
 |---------|-------------|
-| `jjsib init` | Rename current workspace to match directory name |
 | `jjsib add <name> [revision]` | Create sibling workspace (default: current revision) |
 | `jjsib switch [name]` | Switch to workspace (interactive if no name given) |
 | `jjsib remove [name]` | Remove workspace and directory (interactive if no name) |

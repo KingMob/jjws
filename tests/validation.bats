@@ -75,13 +75,6 @@ load 'test_helper/common'
     [[ "$output" == *"requires exactly two arguments"* ]]
 }
 
-@test "init mode rejects arguments" {
-    run_jjsib init somearg
-
-    [ "$status" -eq 1 ]
-    [[ "$output" == *"doesn't accept additional arguments"* ]]
-}
-
 @test "list mode rejects arguments" {
     run_jjsib list somearg
 

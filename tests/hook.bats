@@ -90,7 +90,6 @@ teardown() {
     # Should use fish complete command
     [[ "$output" == *"complete -c jjsib"* ]]
     # Should have mode completions
-    [[ "$output" == *"-a \"init\""* ]]
     [[ "$output" == *"-a \"add\""* ]]
 }
 
