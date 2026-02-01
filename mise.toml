@@ -1,5 +1,7 @@
 [tools]
 bats = "latest"
+gum = "latest"
+jj = "latest"
 
 [tasks.test]
 description = "Run all bats tests"
