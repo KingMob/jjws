@@ -10,3 +10,7 @@ run = "bats tests/*.bats"
 [tasks."test:file"]
 description = "Run a single test file"
 run = "bats {{arg(name='file')}}"
+
+[tasks."test:compat"]
+description = "Run all tests under jj 0.37 (backward compat)"
+run = "mise exec jj@0.37.0 -- bats tests/*.bats"

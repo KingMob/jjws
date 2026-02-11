@@ -38,6 +38,13 @@ run_jjsib() {
     run "$SCRIPT_PATH" "$@"
 }
 
+# Run the script under test with a specific jj version via mise exec
+run_jjsib_with_jj() {
+    local jj_version="$1"
+    shift
+    run mise exec jj@"$jj_version" -- "$SCRIPT_PATH" "$@"
+}
+
 # Get current workspace name from jj workspace list
 get_workspace_name() {
     jj workspace list --ignore-working-copy | awk -F: '{print $1}'

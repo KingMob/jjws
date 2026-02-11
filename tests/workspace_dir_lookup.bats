@@ -3,73 +3,107 @@
 load 'test_helper/common'
 
 # Tests for resolve_workspace_dir() — workspace-to-directory lookup
+# setup() in common.bash always inits repos with the default (latest) jj.
+# Individual tests use run_jjsib_with_jj to exercise specific code paths.
 
-@test "resolve_workspace_dir falls back to PARENT_DIR/name when jj < 0.38" {
-    # Force the feature flag off to simulate old jj
-    run_jjsib add my-workspace
+# --- jj 0.37 (fallback path: PARENT_DIR/$ws_name) ---
+
+@test "add works with jj 0.37 (fallback path)" {
+    run_jjsib_with_jj 0.37.0 add foo
 
     [ "$status" -eq 0 ]
-
-    # The workspace directory should be at PARENT_DIR/my-workspace (sibling)
-    [ -d "${TEST_TEMP_DIR}/my-workspace" ]
+    [ -d "${TEST_TEMP_DIR}/foo" ]
 }
 
-@test "resolve_workspace_dir uses jj workspace root --name when available" {
-    # We can't easily control the jj version in tests, but we can verify
-    # that the add/switch workflow works end-to-end regardless of version.
-    # On jj >= 0.38, resolve_workspace_dir will use the new API;
-    # on older jj, it falls back to PARENT_DIR/name — both produce the
-    # same result for standard sibling workspaces.
-    run_jjsib add test-ws
+@test "switch works with jj 0.37" {
+    run_jjsib_with_jj 0.37.0 add sw-old
 
     [ "$status" -eq 0 ]
-    [ -d "${TEST_TEMP_DIR}/test-ws" ]
 
-    # Switch should resolve to the same directory
-    run_jjsib switch test-ws
+    run_jjsib_with_jj 0.37.0 switch sw-old
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"cd '"* ]]
-    [[ "$output" == *"test-ws"* ]]
+    [[ "$output" == *"sw-old"* ]]
 }
 
-@test "resolve_workspace_dir falls back when jj workspace root --name fails" {
-    # Create a workspace, then forget it from jj but leave the directory
-    run_jjsib add ephemeral-ws
+@test "forget works with jj 0.37" {
+    run_jjsib_with_jj 0.37.0 add fg-old
+
+    [ "$status" -eq 0 ]
+    [ -d "${TEST_TEMP_DIR}/fg-old" ]
+
+    run_jjsib_with_jj 0.37.0 forget fg-old
+
+    [ "$status" -eq 0 ]
+    [ ! -d "${TEST_TEMP_DIR}/fg-old" ]
+}
+
+# --- jj 0.38 (workspace root --name path) ---
+
+@test "add works with jj 0.38 (workspace root --name path)" {
+    run_jjsib_with_jj 0.38.0 add bar
+
+    [ "$status" -eq 0 ]
+    [ -d "${TEST_TEMP_DIR}/bar" ]
+}
+
+@test "switch resolves via workspace root --name with jj 0.38" {
+    run_jjsib_with_jj 0.38.0 add sw-new
+
     [ "$status" -eq 0 ]
 
-    # Forget from jj (but don't delete the directory)
-    jj workspace forget ephemeral-ws
+    run_jjsib_with_jj 0.38.0 switch sw-new
 
-    # The directory still exists
+    [ "$status" -eq 0 ]
+    [[ "$output" == *"cd '"* ]]
+    [[ "$output" == *"sw-new"* ]]
+}
+
+@test "forget resolves via workspace root --name with jj 0.38" {
+    run_jjsib_with_jj 0.38.0 add fg-new
+
+    [ "$status" -eq 0 ]
+    [ -d "${TEST_TEMP_DIR}/fg-new" ]
+
+    run_jjsib_with_jj 0.38.0 forget fg-new
+
+    [ "$status" -eq 0 ]
+    [ ! -d "${TEST_TEMP_DIR}/fg-new" ]
+}
+
+# --- Mixed scenario: repo from old jj, running with new jj ---
+
+@test "fallback works for primary workspace from old repo on jj 0.38" {
+    # Re-init repo with jj 0.37 so the primary workspace lacks --name support
+    rm -rf "$TEST_REPO_DIR"
+    mkdir -p "$TEST_REPO_DIR"
+    cd "$TEST_REPO_DIR" || exit 1
+    mise exec jj@0.37.0 -- jj git init --colocate
+
+    # list under 0.38 should still work — fallback handles the primary workspace
+    run_jjsib_with_jj 0.38.0 list
+
+    [ "$status" -eq 0 ]
+}
+
+# --- Fallback-on-failure: jj 0.38 but workspace unknown ---
+
+@test "falls back when workspace root --name fails" {
+    # Create a workspace then forget it from jj (leaving directory on disk)
+    run_jjsib_with_jj 0.38.0 add ephemeral-ws
+    [ "$status" -eq 0 ]
+
+    jj workspace forget ephemeral-ws
     [ -d "${TEST_TEMP_DIR}/ephemeral-ws" ]
 
-    # Now if we try to resolve this workspace name, jj workspace root --name
-    # would fail (workspace no longer tracked). The fallback should still
-    # produce PARENT_DIR/ephemeral-ws. We can test this indirectly: re-add
-    # won't work because directory exists, which proves the path resolved
-    # correctly to the existing directory.
-    run_jjsib add ephemeral-ws
+    # Re-adding should detect the existing directory via fallback path
+    run_jjsib_with_jj 0.38.0 add ephemeral-ws
     [ "$status" -eq 1 ]
     [[ "$output" == *"already exists"* ]]
 }
 
-@test "version detection sets JJ_HAS_WS_ROOT_NAME correctly" {
-    # We can't directly inspect the variable, but we can verify the script
-    # runs without error (version parsing doesn't crash)
-    run_jjsib list
-    [ "$status" -eq 0 ]
-}
-
-@test "forget resolves workspace directory correctly" {
-    run_jjsib add lookup-forget
-    [ "$status" -eq 0 ]
-    [ -d "${TEST_TEMP_DIR}/lookup-forget" ]
-
-    run_jjsib forget lookup-forget
-    [ "$status" -eq 0 ]
-    [ ! -d "${TEST_TEMP_DIR}/lookup-forget" ]
-}
+# --- rename (exercises resolve for both old and new names) ---
 
 @test "rename resolves both old and new workspace directories" {
     run_jjsib add lookup-old
