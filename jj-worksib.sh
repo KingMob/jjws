@@ -40,11 +40,19 @@ select_workspace() {
     return 0
 }
 
-# Function to set SIBLING_PATH from SIBLING_DIR_NAME
-# Requires SIBLING_DIR_NAME to be set (defensive check prevents dangerous empty paths)
-set_sibling_path() {
-    : "${SIBLING_DIR_NAME:?SIBLING_DIR_NAME not set}"
-    SIBLING_PATH="$PARENT_DIR/$SIBLING_DIR_NAME"
+# Resolve the directory for a workspace by name, setting SIBLING_PATH.
+# Uses jj workspace root --name if available (jj >= 0.38), otherwise
+# assumes the workspace directory is a sibling named after the workspace.
+resolve_workspace_dir() {
+    local ws_name="${1:?workspace name required}"
+    if [[ "$JJ_HAS_WS_ROOT_NAME" == true ]]; then
+        local root
+        if root=$(jj workspace root --name "$ws_name" 2>/dev/null) && [[ -n "$root" ]]; then
+            SIBLING_PATH="$root"
+            return
+        fi
+    fi
+    SIBLING_PATH="$PARENT_DIR/$ws_name"
 }
 
 # Function to interactively select a workspace and set SIBLING_PATH
@@ -52,7 +60,7 @@ resolve_workspace_interactive() {
     if ! WORKSPACE_NAME=$(select_workspace); then
         exit 1
     fi
-    SIBLING_PATH="$PARENT_DIR/$WORKSPACE_NAME"
+    resolve_workspace_dir "$WORKSPACE_NAME"
 }
 
 # Function to verify a path exists and is a directory
@@ -600,6 +608,15 @@ fi
 
 PARENT_DIR=$(dirname "$WS_ROOT")
 
+JJ_HAS_WS_ROOT_NAME=false
+jj_version=$(jj version 2>/dev/null | grep -oE '[0-9]+\.[0-9]+' | head -1)
+if [[ -n "$jj_version" ]]; then
+    jj_major="${jj_version%%.*}"
+    jj_minor="${jj_version#*.}"
+    if (( jj_major > 0 || jj_minor >= 38 )); then
+        JJ_HAS_WS_ROOT_NAME=true
+    fi
+fi
 
 # Auto-sync workspace name with directory name
 # This runs before any mode logic to ensure workspace/directory names match
@@ -642,9 +659,8 @@ case "$MODE" in
             exit 1
         fi
         PARENT_REVSET="${3:-@}"
-        
-        SIBLING_DIR_NAME="$WORKSPACE_NAME"
-        set_sibling_path
+
+        resolve_workspace_dir "$WORKSPACE_NAME"
         ;;
     forget|remove|rm)
         if [ $# -eq 1 ]; then
@@ -664,8 +680,7 @@ case "$MODE" in
                 exit 1
             fi
 
-            SIBLING_DIR_NAME="$WORKSPACE_NAME"
-            set_sibling_path
+            resolve_workspace_dir "$WORKSPACE_NAME"
         fi
         ;;
     switch|sw)
@@ -673,7 +688,6 @@ case "$MODE" in
             # Switch with no workspace name is allowed (will use interactive selection)
             INTERACTIVE=true
         else
-            # INTERACTIVE_SWITCH=false
             # For switch mode with explicit workspace, we need at least 2 arguments
             if [ $# -ne 2 ]; then
                 echo "❌ Mode '$MODE' requires exactly one workspace name" >&2
@@ -687,8 +701,7 @@ case "$MODE" in
                 exit 1
             fi
 
-            SIBLING_DIR_NAME="$WORKSPACE_NAME"
-            set_sibling_path
+            resolve_workspace_dir "$WORKSPACE_NAME"
         fi
         ;;
     rename)
@@ -710,8 +723,10 @@ case "$MODE" in
             exit 1
         fi
 
-        OLD_SIBLING_PATH="$PARENT_DIR/$OLD_WORKSPACE_NAME"
-        NEW_SIBLING_PATH="$PARENT_DIR/$NEW_WORKSPACE_NAME"
+        resolve_workspace_dir "$OLD_WORKSPACE_NAME"
+        OLD_SIBLING_PATH="$SIBLING_PATH"
+        resolve_workspace_dir "$NEW_WORKSPACE_NAME"
+        NEW_SIBLING_PATH="$SIBLING_PATH"
         ;;
     *)
         echo "❌ Mode must be 'add', 'create', 'forget', 'remove', 'rm', 'switch', 'sw', 'rename', 'list', 'ls', 'hook', 'version', or 'help'" >&2
