@@ -30,14 +30,14 @@ Single self-contained bash script with no external dependencies beyond `jj` and 
 
 **Mode dispatch:** Single `case` statement validates arguments, second `case` statement executes mode logic.
 
-## Tickets
+## Issues
 
-Use `tk` for tracking work. Tickets are stored in `.tickets/` as markdown files.
+Use `br` for tracking work. Issues are stored in `.beads/`. Always pass `--json` when reading `br` output programmatically (e.g. in scripts or when parsing results).
 
 ```bash
-tk create "Title" -t feature -d "Description"  # Create ticket
-tk ls                                           # List open tickets
-tk start <id>                                   # Mark in progress
-tk close <id>                                   # Mark complete
-tk show <id>                                    # View details
+br create "Title" -t feature -d "Description"  # Create issue
+br list                                         # List open issues
+br update <id> -s in_progress                   # Mark in progress
+br close <id>                                   # Mark complete
+br show <id>                                    # View details
 ```
