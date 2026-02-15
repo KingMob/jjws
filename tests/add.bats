@@ -5,7 +5,7 @@ load 'test_helper/common'
 # Tests for add/create mode
 
 @test "add creates sibling workspace" {
-    run_jjsib add feature-one
+    run_jjws add feature-one
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Successfully created sibling workspace"* ]]
@@ -18,7 +18,7 @@ load 'test_helper/common'
 }
 
 @test "create is an alias for add" {
-    run_jjsib create feature-two
+    run_jjws create feature-two
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Successfully created sibling workspace"* ]]
@@ -31,7 +31,7 @@ load 'test_helper/common'
     jj commit -m "Initial commit"
 
     # Create workspace at @ (current revision)
-    run_jjsib add feature-at @
+    run_jjws add feature-at @
 
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/feature-at" ]
@@ -41,14 +41,14 @@ load 'test_helper/common'
     # Create a directory first
     mkdir -p "${TEST_TEMP_DIR}/existing-dir"
 
-    run_jjsib add existing-dir
+    run_jjws add existing-dir
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"already exists"* ]]
 }
 
 @test "add lists workspace in jj workspace list" {
-    run_jjsib add new-workspace
+    run_jjws add new-workspace
 
     [ "$status" -eq 0 ]
 
@@ -59,7 +59,7 @@ load 'test_helper/common'
 
 @test "add creates workspace with default parent @" {
     # Without specifying parent revset, it should default to @
-    run_jjsib add default-parent
+    run_jjws add default-parent
 
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/default-parent" ]
@@ -72,7 +72,7 @@ cd "$(dirname "$0")" || exit 1
 touch .init-ran' > "${TEST_REPO_DIR}/.workspace-init.sh"
     chmod +x "${TEST_REPO_DIR}/.workspace-init.sh"
 
-    run_jjsib add workspace-with-init
+    run_jjws add workspace-with-init
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"initialization script"* ]]
@@ -81,62 +81,25 @@ touch .init-ran' > "${TEST_REPO_DIR}/.workspace-init.sh"
     [ -f "${TEST_TEMP_DIR}/workspace-with-init/.init-ran" ]
 }
 
-@test "add runs .jjsib-add-init.sh as fallback" {
-    # Test backwards compatibility with old init script name
-    echo '#!/bin/bash
-cd "$(dirname "$0")" || exit 1
-touch .legacy-init-ran' > "${TEST_REPO_DIR}/.jjsib-add-init.sh"
-    chmod +x "${TEST_REPO_DIR}/.jjsib-add-init.sh"
-
-    run_jjsib add workspace-with-legacy-init
-
-    [ "$status" -eq 0 ]
-    [[ "$output" == *"initialization script"* ]]
-
-    # Check that the init script ran
-    [ -f "${TEST_TEMP_DIR}/workspace-with-legacy-init/.legacy-init-ran" ]
-}
-
-@test "add prefers .workspace-init.sh over .jjsib-add-init.sh" {
-    # Create both init scripts
-    echo '#!/bin/bash
-cd "$(dirname "$0")" || exit 1
-touch .new-init-ran' > "${TEST_REPO_DIR}/.workspace-init.sh"
-    chmod +x "${TEST_REPO_DIR}/.workspace-init.sh"
-
-    echo '#!/bin/bash
-cd "$(dirname "$0")" || exit 1
-touch .legacy-init-ran' > "${TEST_REPO_DIR}/.jjsib-add-init.sh"
-    chmod +x "${TEST_REPO_DIR}/.jjsib-add-init.sh"
-
-    run_jjsib add workspace-prefer-new
-
-    [ "$status" -eq 0 ]
-
-    # Only new init should have run
-    [ -f "${TEST_TEMP_DIR}/workspace-prefer-new/.new-init-ran" ]
-    [ ! -f "${TEST_TEMP_DIR}/workspace-prefer-new/.legacy-init-ran" ]
-}
-
 @test "add fails if init script fails" {
     echo '#!/bin/bash
 exit 1' > "${TEST_REPO_DIR}/.workspace-init.sh"
     chmod +x "${TEST_REPO_DIR}/.workspace-init.sh"
 
-    run_jjsib add workspace-failing-init
+    run_jjws add workspace-failing-init
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"Initialization script failed"* ]]
 }
 
 @test "add creates multiple sibling workspaces" {
-    run_jjsib add ws1
+    run_jjws add ws1
     [ "$status" -eq 0 ]
 
-    run_jjsib add ws2
+    run_jjws add ws2
     [ "$status" -eq 0 ]
 
-    run_jjsib add ws3
+    run_jjws add ws3
     [ "$status" -eq 0 ]
 
     # All should exist

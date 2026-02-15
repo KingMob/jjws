@@ -2,7 +2,7 @@
 
 # Tests for help and version output (no jj repo required)
 
-SCRIPT_PATH="$(cd "$(dirname "${BATS_TEST_DIRNAME}")" && pwd)/jj-worksib.sh"
+SCRIPT_PATH="$(cd "$(dirname "${BATS_TEST_DIRNAME}")" && pwd)/jj-ws.sh"
 
 setup() {
     # These tests don't need a jj repo, just a temp directory
@@ -29,16 +29,16 @@ teardown() {
     run "$SCRIPT_PATH" version
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib"* ]]
-    # Version should match format like "jjsib 0.2.0"
-    [[ "$output" =~ ^jjsib\ [0-9]+\.[0-9]+\.[0-9]+$ ]]
+    [[ "$output" == *"jjws"* ]]
+    # Version should match format like "jjws 0.2.0"
+    [[ "$output" =~ ^jjws\ [0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
 @test "--version flag shows version" {
     run "$SCRIPT_PATH" --version
 
     [ "$status" -eq 0 ]
-    [[ "$output" =~ ^jjsib\ [0-9]+\.[0-9]+\.[0-9]+$ ]]
+    [[ "$output" =~ ^jjws\ [0-9]+\.[0-9]+\.[0-9]+$ ]]
 }
 
 @test "-v flag is not a version alias" {
@@ -71,7 +71,7 @@ teardown() {
     run "$SCRIPT_PATH" help add
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib add"* ]]
+    [[ "$output" == *"jjws add"* ]]
     [[ "$output" == *"workspace-name"* ]]
     [[ "$output" == *"parent-revset"* ]]
     [[ "$output" == *"Aliases: create"* ]]
@@ -81,14 +81,14 @@ teardown() {
     run "$SCRIPT_PATH" help create
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib add"* ]]
+    [[ "$output" == *"jjws add"* ]]
 }
 
 @test "help forget shows forget-specific help" {
     run "$SCRIPT_PATH" help forget
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib forget"* ]]
+    [[ "$output" == *"jjws forget"* ]]
     [[ "$output" == *"Aliases: remove, rm"* ]]
 }
 
@@ -96,14 +96,14 @@ teardown() {
     run "$SCRIPT_PATH" help rm
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib forget"* ]]
+    [[ "$output" == *"jjws forget"* ]]
 }
 
 @test "help switch shows switch-specific help" {
     run "$SCRIPT_PATH" help switch
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib switch"* ]]
+    [[ "$output" == *"jjws switch"* ]]
     [[ "$output" == *"Aliases: sw"* ]]
 }
 
@@ -111,14 +111,14 @@ teardown() {
     run "$SCRIPT_PATH" help sw
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib switch"* ]]
+    [[ "$output" == *"jjws switch"* ]]
 }
 
 @test "help rename shows rename-specific help" {
     run "$SCRIPT_PATH" help rename
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib rename"* ]]
+    [[ "$output" == *"jjws rename"* ]]
     [[ "$output" == *"old-name"* ]]
     [[ "$output" == *"new-name"* ]]
 }
@@ -127,7 +127,7 @@ teardown() {
     run "$SCRIPT_PATH" help list
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib list"* ]]
+    [[ "$output" == *"jjws list"* ]]
     [[ "$output" == *"Aliases: ls"* ]]
 }
 
@@ -135,14 +135,14 @@ teardown() {
     run "$SCRIPT_PATH" help ls
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib list"* ]]
+    [[ "$output" == *"jjws list"* ]]
 }
 
 @test "help hook shows hook-specific help" {
     run "$SCRIPT_PATH" help hook
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib hook"* ]]
+    [[ "$output" == *"jjws hook"* ]]
     [[ "$output" == *"bash, zsh, or fish"* ]]
 }
 
@@ -150,7 +150,7 @@ teardown() {
     run "$SCRIPT_PATH" help version
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib version"* ]]
+    [[ "$output" == *"jjws version"* ]]
     [[ "$output" == *"Aliases: --version"* ]]
 }
 
@@ -158,7 +158,7 @@ teardown() {
     run "$SCRIPT_PATH" help help
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib help"* ]]
+    [[ "$output" == *"jjws help"* ]]
     [[ "$output" == *"Aliases: --help, -h"* ]]
 }
 
@@ -209,5 +209,5 @@ teardown() {
     run "$SCRIPT_PATH" help
 
     [ "$status" -eq 0 ]
-    [[ "$output" == *"jjsib help <mode>"* ]]
+    [[ "$output" == *"jjws help <mode>"* ]]
 }

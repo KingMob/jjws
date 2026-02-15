@@ -6,14 +6,14 @@ load 'test_helper/common'
 
 @test "list shows current workspace" {
     # Auto-sync should have renamed workspace to test-repo
-    run_jjsib list
+    run_jjws list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"test-repo"* ]]
 }
 
 @test "ls is an alias for list" {
-    run_jjsib ls
+    run_jjws ls
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"test-repo"* ]]
@@ -21,14 +21,14 @@ load 'test_helper/common'
 
 @test "list shows all workspaces after adding" {
     # Add a workspace
-    run_jjsib add workspace-alpha
+    run_jjws add workspace-alpha
     [ "$status" -eq 0 ]
 
-    run_jjsib add workspace-beta
+    run_jjws add workspace-beta
     [ "$status" -eq 0 ]
 
     # List should show all workspaces
-    run_jjsib list
+    run_jjws list
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"test-repo"* ]]
@@ -38,13 +38,13 @@ load 'test_helper/common'
 
 @test "list output format matches jj workspace list" {
     # The list output should match jj's format
-    run_jjsib list
-    local jjsib_output="$output"
+    run_jjws list
+    local jjws_output="$output"
 
     run jj workspace list
     local jj_output="$output"
 
     # They should be identical (minus any auto-sync messages)
-    # We check that the jj output is contained in jjsib output
-    [[ "$jjsib_output" == *"$jj_output"* ]] || [ "$jjsib_output" = "$jj_output" ]
+    # We check that the jj output is contained in jjws output
+    [[ "$jjws_output" == *"$jj_output"* ]] || [ "$jjws_output" = "$jj_output" ]
 }

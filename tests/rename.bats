@@ -6,12 +6,12 @@ load 'test_helper/common'
 
 @test "rename renames workspace and directory" {
     # Add a workspace to rename
-    run_jjsib add old-name
+    run_jjws add old-name
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/old-name" ]
 
     # Rename it
-    run_jjsib rename old-name new-name
+    run_jjws rename old-name new-name
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"Workspace renamed in jj"* ]]
@@ -23,10 +23,10 @@ load 'test_helper/common'
 }
 
 @test "rename updates workspace in jj" {
-    run_jjsib add ws-before
+    run_jjws add ws-before
     [ "$status" -eq 0 ]
 
-    run_jjsib rename ws-before ws-after
+    run_jjws rename ws-before ws-after
 
     [ "$status" -eq 0 ]
 
@@ -37,17 +37,17 @@ load 'test_helper/common'
 }
 
 @test "rename fails if old workspace does not exist" {
-    run_jjsib rename nonexistent-ws new-ws
+    run_jjws rename nonexistent-ws new-ws
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"does not exist"* ]]
 }
 
 @test "rename fails if new name already exists" {
-    run_jjsib add existing-name
-    run_jjsib add to-rename
+    run_jjws add existing-name
+    run_jjws add to-rename
 
-    run_jjsib rename to-rename existing-name
+    run_jjws rename to-rename existing-name
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"already exists"* ]]
@@ -56,7 +56,7 @@ load 'test_helper/common'
 @test "rename current workspace outputs cd command" {
     # The current workspace is "test-repo"
     # Renaming it should output a cd command
-    run_jjsib rename test-repo test-repo-renamed
+    run_jjws rename test-repo test-repo-renamed
 
     [ "$status" -eq 0 ]
     # Should include cd command for shell to execute
@@ -72,7 +72,7 @@ load 'test_helper/common'
 }
 
 @test "rename preserves workspace files" {
-    run_jjsib add ws-with-content
+    run_jjws add ws-with-content
     [ "$status" -eq 0 ]
 
     # Create files in the workspace
@@ -81,7 +81,7 @@ load 'test_helper/common'
     echo "nested data" > "${TEST_TEMP_DIR}/ws-with-content/subdir/nested.txt"
 
     # Rename it
-    run_jjsib rename ws-with-content ws-renamed-content
+    run_jjws rename ws-with-content ws-renamed-content
 
     [ "$status" -eq 0 ]
 
@@ -95,9 +95,9 @@ load 'test_helper/common'
 }
 
 @test "rename validates new workspace name" {
-    run_jjsib add valid-name
+    run_jjws add valid-name
 
-    run_jjsib rename valid-name "invalid name with spaces"
+    run_jjws rename valid-name "invalid name with spaces"
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"Workspace name must contain only"* ]]
@@ -107,7 +107,7 @@ load 'test_helper/common'
 }
 
 @test "rename validates old workspace name" {
-    run_jjsib rename "invalid@name" "new-name"
+    run_jjws rename "invalid@name" "new-name"
 
     [ "$status" -eq 1 ]
     [[ "$output" == *"Workspace name must contain only"* ]]

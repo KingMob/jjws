@@ -6,8 +6,8 @@ load 'test_helper/common'
     # jj init creates workspace "default", but directory is "test-repo"
     # The auto-sync should rename it to match
 
-    # Run jjsib list (auto-sync happens before list output)
-    run_jjsib list
+    # Run jjws list (auto-sync happens before list output)
+    run_jjws list
 
     # Should succeed
     [ "$status" -eq 0 ]
@@ -25,8 +25,8 @@ load 'test_helper/common'
     # First, manually rename workspace to match directory
     jj workspace rename test-repo
 
-    # Now run jjsib list
-    run_jjsib list
+    # Now run jjws list
+    run_jjws list
 
     # Should succeed
     [ "$status" -eq 0 ]

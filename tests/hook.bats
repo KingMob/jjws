@@ -2,7 +2,7 @@
 
 # Tests for hook mode (no jj repo required)
 
-SCRIPT_PATH="$(cd "$(dirname "${BATS_TEST_DIRNAME}")" && pwd)/jj-worksib.sh"
+SCRIPT_PATH="$(cd "$(dirname "${BATS_TEST_DIRNAME}")" && pwd)/jj-ws.sh"
 
 setup() {
     TEST_TEMP_DIR="$(mktemp -d)"
@@ -34,10 +34,10 @@ teardown() {
     run "$SCRIPT_PATH" hook bash
 
     [ "$status" -eq 0 ]
-    # Should contain the jjsib function
-    [[ "$output" == *"jjsib()"* ]]
+    # Should contain the jjws function
+    [[ "$output" == *"jjws()"* ]]
     # Should contain completion
-    [[ "$output" == *"_jjsib_completion"* ]]
+    [[ "$output" == *"_jjws_completion"* ]]
 }
 
 @test "hook bash outputs bash completion" {
@@ -56,10 +56,10 @@ teardown() {
     run "$SCRIPT_PATH" hook zsh
 
     [ "$status" -eq 0 ]
-    # Should contain the jjsib function
-    [[ "$output" == *"jjsib()"* ]]
+    # Should contain the jjws function
+    [[ "$output" == *"jjws()"* ]]
     # Should contain zsh-specific completion
-    [[ "$output" == *"_jjsib()"* ]]
+    [[ "$output" == *"_jjws()"* ]]
     [[ "$output" == *"compdef"* ]]
 }
 
@@ -79,7 +79,7 @@ teardown() {
 
     [ "$status" -eq 0 ]
     # Should contain fish function syntax
-    [[ "$output" == *"function jjsib"* ]]
+    [[ "$output" == *"function jjws"* ]]
 }
 
 @test "hook fish outputs fish completion" {
@@ -87,7 +87,7 @@ teardown() {
 
     [ "$status" -eq 0 ]
     # Should use fish complete command
-    [[ "$output" == *"complete -c jjsib"* ]]
+    [[ "$output" == *"complete -c jjws"* ]]
     # Should have mode completions
     [[ "$output" == *"-a \"add\""* ]]
 }

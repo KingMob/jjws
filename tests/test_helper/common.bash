@@ -1,7 +1,7 @@
-# Common test helper for jjsib tests
+# Common test helper for jjws tests
 
 # Get the absolute path to the script under test
-SCRIPT_PATH="$(cd "$(dirname "${BATS_TEST_DIRNAME}")" && pwd)/jj-worksib.sh"
+SCRIPT_PATH="$(cd "$(dirname "${BATS_TEST_DIRNAME}")" && pwd)/jj-ws.sh"
 export SCRIPT_PATH
 
 setup() {
@@ -34,12 +34,12 @@ teardown() {
 }
 
 # Run the script under test
-run_jjsib() {
+run_jjws() {
     run "$SCRIPT_PATH" "$@"
 }
 
 # Run the script under test with a specific jj version via mise exec
-run_jjsib_with_jj() {
+run_jjws_with_jj() {
     local jj_version="$1"
     shift
     run mise exec jj@"$jj_version" -- "$SCRIPT_PATH" "$@"

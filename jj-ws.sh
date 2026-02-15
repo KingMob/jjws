@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-VERSION="0.4.1"
+VERSION="0.5.0"
 
 # Function to validate workspace name
 validate_workspace_name() {
@@ -80,9 +80,9 @@ require_directory() {
 # Function to display usage information
 usage() {
     cat <<EOF
-jjsib $VERSION - Sibling workspace manager for Jujutsu (jj)
+jjws $VERSION - Sibling workspace manager for Jujutsu (jj)
 
-Usage: jjsib <mode> [mode arguments...]
+Usage: jjws <mode> [mode arguments...]
 
 Manages sibling Jujutsu (jj) workspaces at the same directory level as the current repository.
 
@@ -96,19 +96,19 @@ Modes:
   version           Show version information
   help              Show this help message
 
-Run 'jjsib help <mode>' for detailed information about a specific mode.
+Run 'jjws help <mode>' for detailed information about a specific mode.
 
 Note: Sibling directories use the workspace name as the directory name.
       Workspace names are auto-synced to match directory names on each invocation.
 
 Examples:
-  jjsib add feature-workspace
-  jjsib add feature-workspace main
-  jjsib list
-  jjsib forget feature-workspace
-  jjsib switch                        # Interactive selection
-  jjsib sw feature-workspace          # Non-interactive switch
-  jjsib rename old-name new-name
+  jjws add feature-workspace
+  jjws add feature-workspace main
+  jjws list
+  jjws forget feature-workspace
+  jjws switch                        # Interactive selection
+  jjws sw feature-workspace          # Non-interactive switch
+  jjws rename old-name new-name
 
 EOF
 }
@@ -127,9 +127,9 @@ mode_help() {
     case "$mode" in
         add|create)
             cat <<'EOF'
-jjsib add - Create a new sibling workspace
+jjws add - Create a new sibling workspace
 
-Usage: jjsib add <workspace-name> [parent-revset]
+Usage: jjws add <workspace-name> [parent-revset]
 
 Arguments:
   workspace-name    Name of the workspace (will be used as the directory name)
@@ -146,19 +146,19 @@ Initialization Script:
   or other initialization tasks.
 
 Examples:
-  jjsib add feature-workspace           # Create workspace at current revision
-  jjsib add feature-workspace main      # Create workspace at 'main'
-  jjsib add hotfix-123 @                # Explicit current revision
-  jjsib add experiment-ui @-            # Create at parent of current revision
+  jjws add feature-workspace           # Create workspace at current revision
+  jjws add feature-workspace main      # Create workspace at 'main'
+  jjws add hotfix-123 @                # Explicit current revision
+  jjws add experiment-ui @-            # Create at parent of current revision
 
 Aliases: create
 EOF
             ;;
         forget|remove|rm)
             cat <<'EOF'
-jjsib forget - Forget and delete a sibling workspace
+jjws forget - Forget and delete a sibling workspace
 
-Usage: jjsib forget [workspace-name]
+Usage: jjws forget [workspace-name]
 
 Arguments:
   workspace-name    Name of the workspace to forget (optional)
@@ -171,40 +171,40 @@ This command:
 You cannot forget the workspace you are currently in.
 
 Examples:
-  jjsib forget feature-workspace    # Forget specific workspace
-  jjsib forget                      # Interactive selection
-  jjsib rm hotfix-123               # Using 'rm' alias
-  jjsib remove old-workspace        # Using 'remove' alias
+  jjws forget feature-workspace    # Forget specific workspace
+  jjws forget                      # Interactive selection
+  jjws rm hotfix-123               # Using 'rm' alias
+  jjws remove old-workspace        # Using 'remove' alias
 
 Aliases: remove, rm
 EOF
             ;;
         switch|sw)
             cat <<'EOF'
-jjsib switch - Switch to an existing sibling workspace
+jjws switch - Switch to an existing sibling workspace
 
-Usage: jjsib switch [workspace-name]
+Usage: jjws switch [workspace-name]
 
 Arguments:
   workspace-name    Name of the workspace to switch to (optional)
                     If omitted, an interactive selection menu is shown
 
 This command changes your current directory to the specified workspace.
-Note: Requires the jjsib shell function to be installed (via 'jjsib hook').
+Note: Requires the jjws shell function to be installed (via 'jjws hook').
 
 Examples:
-  jjsib switch feature-workspace    # Switch to specific workspace
-  jjsib switch                      # Interactive selection
-  jjsib sw hotfix-123               # Using 'sw' alias
+  jjws switch feature-workspace    # Switch to specific workspace
+  jjws switch                      # Interactive selection
+  jjws sw hotfix-123               # Using 'sw' alias
 
 Aliases: sw
 EOF
             ;;
         rename)
             cat <<'EOF'
-jjsib rename - Rename an existing workspace and its directory
+jjws rename - Rename an existing workspace and its directory
 
-Usage: jjsib rename <old-name> <new-name>
+Usage: jjws rename <old-name> <new-name>
 
 Arguments:
   old-name    Current name of the workspace
@@ -214,35 +214,35 @@ This command:
   1. Renames the workspace in jj
   2. Renames the workspace directory
 
-If you are currently in the workspace being renamed, jjsib will
+If you are currently in the workspace being renamed, jjws will
 automatically switch you to the new directory location.
 
 Examples:
-  jjsib rename old-feature new-feature
-  jjsib rename temp-work final-implementation
+  jjws rename old-feature new-feature
+  jjws rename temp-work final-implementation
 EOF
             ;;
         list|ls)
             cat <<'EOF'
-jjsib list - List all workspaces
+jjws list - List all workspaces
 
-Usage: jjsib list
+Usage: jjws list
 
 This command displays all jj workspaces in the repository.
 It takes no arguments.
 
 Examples:
-  jjsib list
-  jjsib ls          # Using 'ls' alias
+  jjws list
+  jjws ls          # Using 'ls' alias
 
 Aliases: ls
 EOF
             ;;
         hook)
             cat <<'EOF'
-jjsib hook - Output shell function and completion script
+jjws hook - Output shell function and completion script
 
-Usage: jjsib hook <shell>
+Usage: jjws hook <shell>
 
 Arguments:
   shell    The shell to generate hooks for: bash, zsh, or fish
@@ -253,19 +253,19 @@ for the 'switch' command to work (it needs to change the parent shell's
 directory).
 
 Installation:
-  Bash (~/.bashrc):                     eval "$(jjsib hook bash)"
-  Zsh (~/.zshrc):                       eval "$(jjsib hook zsh)"
-  Fish (~/.config/fish/config.fish):    jjsib hook fish | source
+  Bash (~/.bashrc):                     eval "$(jjws hook bash)"
+  Zsh (~/.zshrc):                       eval "$(jjws hook zsh)"
+  Fish (~/.config/fish/config.fish):    jjws hook fish | source
 
 EOF
             ;;
         version)
             cat <<'EOF'
-jjsib version - Show version information
+jjws version - Show version information
 
-Usage: jjsib version
+Usage: jjws version
 
-This command displays the current version of jjsib.
+This command displays the current version of jjws.
 It takes no arguments.
 
 Aliases: --version
@@ -273,25 +273,25 @@ EOF
             ;;
         help)
             cat <<'EOF'
-jjsib help - Show help information
+jjws help - Show help information
 
-Usage: jjsib help [mode]
+Usage: jjws help [mode]
 
 Arguments:
   mode    Name of the mode to get help for (optional)
           If omitted, shows general help
 
 Examples:
-  jjsib help            # Show general help
-  jjsib help add        # Show help for 'add' mode
-  jjsib help switch     # Show help for 'switch' mode
+  jjws help            # Show general help
+  jjws help add        # Show help for 'add' mode
+  jjws help switch     # Show help for 'switch' mode
 
 Aliases: --help, -h (top-level help only, no subcommands)
 EOF
             ;;
         *)
             echo "Unknown mode: $mode" >&2
-            echo "Run 'jjsib help' for a list of available modes." >&2
+            echo "Run 'jjws help' for a list of available modes." >&2
             return 1
             ;;
     esac
@@ -322,7 +322,7 @@ case "$MODE" in
         exit 0
         ;;
     version|--version)
-        echo "jjsib $VERSION"
+        echo "jjws $VERSION"
         exit 0
         ;;
     hook)
@@ -339,16 +339,16 @@ case "$MODE" in
             bash|zsh)
                 # Output bash/zsh compatible function and completion
                 cat <<'EOF'
-# jjsib shell function - required for directory switching to work
-jjsib() {
-    # Check if jj-worksib.sh is in PATH or current directory
+# jjws shell function - required for directory switching to work
+jjws() {
+    # Check if jj-ws.sh is in PATH or current directory
     local script_path
-    if command -v jj-worksib.sh >/dev/null 2>&1; then
-        script_path="jj-worksib.sh"
-    elif [ -f "$HOME/bin/jj-worksib.sh" ]; then
-        script_path="$HOME/bin/jj-worksib.sh"
+    if command -v jj-ws.sh >/dev/null 2>&1; then
+        script_path="jj-ws.sh"
+    elif [ -f "$HOME/bin/jj-ws.sh" ]; then
+        script_path="$HOME/bin/jj-ws.sh"
     else
-        echo "Error: jj-worksib.sh not found" >&2
+        echo "Error: jj-ws.sh not found" >&2
         return 1
     fi
 
@@ -382,11 +382,11 @@ jjsib() {
     fi
 }
 
-# Shell completion for jjsib command
+# Shell completion for jjws command
 
 if [[ -n "$ZSH_VERSION" ]]; then
     # Zsh completion
-    _jjsib() {
+    _jjws() {
         local -a modes workspaces common_revisions
         modes=(
             'add:Create a new sibling workspace'
@@ -434,11 +434,11 @@ if [[ -n "$ZSH_VERSION" ]]; then
             esac
         fi
     }
-    compdef _jjsib jjsib
+    compdef _jjws jjws
 
 elif [[ -n "$BASH_VERSION" ]]; then
     # Bash completion
-    _jjsib_completion() {
+    _jjws_completion() {
         local cur prev words cword
 
         # Manual initialization instead of using _init_completion
@@ -483,23 +483,23 @@ elif [[ -n "$BASH_VERSION" ]]; then
     }
 
     # Register the completion function
-    complete -F _jjsib_completion jjsib
+    complete -F _jjws_completion jjws
 fi
 EOF
                 ;;
             fish)
                 # Output fish-specific function and completion
                 cat <<'EOF'
-# jjsib shell function - required for directory switching to work
-function jjsib
-    # Check if jj-worksib.sh is in PATH or home bin
+# jjws shell function - required for directory switching to work
+function jjws
+    # Check if jj-ws.sh is in PATH or home bin
     set -l script_path
-    if command -v jj-worksib.sh >/dev/null 2>&1
-        set script_path "jj-worksib.sh"
-    else if test -f "$HOME/bin/jj-worksib.sh"
-        set script_path "$HOME/bin/jj-worksib.sh"
+    if command -v jj-ws.sh >/dev/null 2>&1
+        set script_path "jj-ws.sh"
+    else if test -f "$HOME/bin/jj-ws.sh"
+        set script_path "$HOME/bin/jj-ws.sh"
     else
-        echo "Error: jj-worksib.sh not found" >&2
+        echo "Error: jj-ws.sh not found" >&2
         return 1
     end
 
@@ -531,53 +531,53 @@ function jjsib
 end
 
 # Helper function to get workspace list
-function __jjsib_workspaces
+function __jjws_workspaces
     if command -v jj >/dev/null 2>&1; and jj root >/dev/null 2>&1
         jj workspace list 2>/dev/null | awk -F: '{print $1}' | sort
     end
 end
 
 # Clear existing completions
-complete -c jjsib -e
+complete -c jjws -e
 
 # Mode completions (first argument only)
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "add" -d "Create a new sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "create" -d "Create a new sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "forget" -d "Forget and delete a sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "remove" -d "Forget and delete a sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "rm" -d "Forget and delete a sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "switch" -d "Switch to an existing sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "sw" -d "Switch to an existing sibling workspace"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "rename" -d "Rename an existing workspace and its directory"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "list" -d "List all workspaces"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "ls" -d "List all workspaces"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "hook" -d "Output shell function and completion script"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "version" -d "Show version information"
-complete -c jjsib -n "test (count (commandline -opc)) -eq 1" \
+complete -c jjws -n "test (count (commandline -opc)) -eq 1" \
     -a "help" -d "Show help message"
 
 # Workspace name completions for switch, forget, remove, rename (second argument)
-complete -c jjsib -f -n "__fish_seen_subcommand_from switch sw forget remove rm rename; and test (count (commandline -opc)) -eq 2" \
-    -a "(__jjsib_workspaces)" -d "Workspace"
+complete -c jjws -f -n "__fish_seen_subcommand_from switch sw forget remove rm rename; and test (count (commandline -opc)) -eq 2" \
+    -a "(__jjws_workspaces)" -d "Workspace"
 
 # For rename, complete new workspace name (third argument)
-complete -c jjsib -f -n "__fish_seen_subcommand_from rename; and test (count (commandline -opc)) -eq 3" \
-    -a "(__jjsib_workspaces)" -d "New workspace name"
+complete -c jjws -f -n "__fish_seen_subcommand_from rename; and test (count (commandline -opc)) -eq 3" \
+    -a "(__jjws_workspaces)" -d "New workspace name"
 
 # Common revisions for add mode (third argument)
-complete -c jjsib -f -n "__fish_seen_subcommand_from add create; and test (count (commandline -opc)) -eq 3" \
+complete -c jjws -f -n "__fish_seen_subcommand_from add create; and test (count (commandline -opc)) -eq 3" \
     -a "@ main trunk master HEAD" -d "Revision"
 EOF
                 ;;
@@ -756,8 +756,6 @@ case "$MODE" in
             INIT_SCRIPT=""
             if [ -f "$SIBLING_PATH/.workspace-init.sh" ]; then
                 INIT_SCRIPT=".workspace-init.sh"
-            elif [ -f "$SIBLING_PATH/.jjsib-add-init.sh" ]; then
-                INIT_SCRIPT=".jjsib-add-init.sh"
             fi
             if [ -n "$INIT_SCRIPT" ]; then
                 echo "🔧 Found initialization script, running it..."

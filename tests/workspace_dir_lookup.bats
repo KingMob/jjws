@@ -4,23 +4,23 @@ load 'test_helper/common'
 
 # Tests for resolve_workspace_dir() — workspace-to-directory lookup
 # setup() in common.bash always inits repos with the default (latest) jj.
-# Individual tests use run_jjsib_with_jj to exercise specific code paths.
+# Individual tests use run_jjws_with_jj to exercise specific code paths.
 
 # --- jj 0.37 (fallback path: PARENT_DIR/$ws_name) ---
 
 @test "add works with jj 0.37 (fallback path)" {
-    run_jjsib_with_jj 0.37.0 add foo
+    run_jjws_with_jj 0.37.0 add foo
 
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/foo" ]
 }
 
 @test "switch works with jj 0.37" {
-    run_jjsib_with_jj 0.37.0 add sw-old
+    run_jjws_with_jj 0.37.0 add sw-old
 
     [ "$status" -eq 0 ]
 
-    run_jjsib_with_jj 0.37.0 switch sw-old
+    run_jjws_with_jj 0.37.0 switch sw-old
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"cd '"* ]]
@@ -28,12 +28,12 @@ load 'test_helper/common'
 }
 
 @test "forget works with jj 0.37" {
-    run_jjsib_with_jj 0.37.0 add fg-old
+    run_jjws_with_jj 0.37.0 add fg-old
 
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/fg-old" ]
 
-    run_jjsib_with_jj 0.37.0 forget fg-old
+    run_jjws_with_jj 0.37.0 forget fg-old
 
     [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/fg-old" ]
@@ -42,18 +42,18 @@ load 'test_helper/common'
 # --- jj 0.38 (workspace root --name path) ---
 
 @test "add works with jj 0.38 (workspace root --name path)" {
-    run_jjsib_with_jj 0.38.0 add bar
+    run_jjws_with_jj 0.38.0 add bar
 
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/bar" ]
 }
 
 @test "switch resolves via workspace root --name with jj 0.38" {
-    run_jjsib_with_jj 0.38.0 add sw-new
+    run_jjws_with_jj 0.38.0 add sw-new
 
     [ "$status" -eq 0 ]
 
-    run_jjsib_with_jj 0.38.0 switch sw-new
+    run_jjws_with_jj 0.38.0 switch sw-new
 
     [ "$status" -eq 0 ]
     [[ "$output" == *"cd '"* ]]
@@ -61,12 +61,12 @@ load 'test_helper/common'
 }
 
 @test "forget resolves via workspace root --name with jj 0.38" {
-    run_jjsib_with_jj 0.38.0 add fg-new
+    run_jjws_with_jj 0.38.0 add fg-new
 
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/fg-new" ]
 
-    run_jjsib_with_jj 0.38.0 forget fg-new
+    run_jjws_with_jj 0.38.0 forget fg-new
 
     [ "$status" -eq 0 ]
     [ ! -d "${TEST_TEMP_DIR}/fg-new" ]
@@ -82,7 +82,7 @@ load 'test_helper/common'
     mise exec jj@0.37.0 -- jj git init --colocate
 
     # list under 0.38 should still work — fallback handles the primary workspace
-    run_jjsib_with_jj 0.38.0 list
+    run_jjws_with_jj 0.38.0 list
 
     [ "$status" -eq 0 ]
 }
@@ -91,14 +91,14 @@ load 'test_helper/common'
 
 @test "falls back when workspace root --name fails" {
     # Create a workspace then forget it from jj (leaving directory on disk)
-    run_jjsib_with_jj 0.38.0 add ephemeral-ws
+    run_jjws_with_jj 0.38.0 add ephemeral-ws
     [ "$status" -eq 0 ]
 
     jj workspace forget ephemeral-ws
     [ -d "${TEST_TEMP_DIR}/ephemeral-ws" ]
 
     # Re-adding should detect the existing directory via fallback path
-    run_jjsib_with_jj 0.38.0 add ephemeral-ws
+    run_jjws_with_jj 0.38.0 add ephemeral-ws
     [ "$status" -eq 1 ]
     [[ "$output" == *"already exists"* ]]
 }
@@ -106,11 +106,11 @@ load 'test_helper/common'
 # --- rename (exercises resolve for both old and new names) ---
 
 @test "rename resolves both old and new workspace directories" {
-    run_jjsib add lookup-old
+    run_jjws add lookup-old
     [ "$status" -eq 0 ]
     [ -d "${TEST_TEMP_DIR}/lookup-old" ]
 
-    run_jjsib rename lookup-old lookup-new
+    run_jjws rename lookup-old lookup-new
     [ "$status" -eq 0 ]
 
     [ ! -d "${TEST_TEMP_DIR}/lookup-old" ]
