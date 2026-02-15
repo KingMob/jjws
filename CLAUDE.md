@@ -30,6 +30,17 @@ Single self-contained bash script with no external dependencies beyond `jj` and 
 
 **Mode dispatch:** Single `case` statement validates arguments, second `case` statement executes mode logic.
 
+## Testing
+
+Tests use bats, organized by mode in `tests/`. For minor or focused changes, run only the relevant test file(s) plus `validation.bats`:
+
+```bash
+mise run test:file tests/help_usage.bats    # Run a single test file
+mise run test:file tests/validation.bats    # Always good to include
+```
+
+Run the full suite (`mise run test`) for major changes, refactors, or anything touching shared logic (argument parsing, workspace directory lookup, auto-sync).
+
 ## Issues
 
 Use `br` for tracking work. Issues are stored in `.beads/`. Always pass `--json` when reading `br` output programmatically (e.g. in scripts or when parsing results).
